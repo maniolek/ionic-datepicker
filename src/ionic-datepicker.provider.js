@@ -67,7 +67,7 @@ angular.module('ionic-datepicker.provider', [])
         $scope.selctedDateEpoch = selectedDate.epoch;
 
         if ($scope.mainObj.closeOnSelect) {
-          $scope.mainObj.callback($scope.selctedDateEpoch);
+          $scope.mainObj.callbackSet($scope.selctedDateEpoch);
           if ($scope.mainObj.templateType.toLowerCase() == 'popup') {
             $scope.popup.close();
           } else {
@@ -82,14 +82,14 @@ angular.module('ionic-datepicker.provider', [])
         refreshDateList(new Date());
         $scope.selctedDateEpoch = resetHMSM(today).getTime();
         if ($scope.mainObj.closeOnSelect) {
-          $scope.mainObj.callback($scope.selctedDateEpoch);
+          $scope.mainObj.callbackSet($scope.selctedDateEpoch);
           closeModal();
         }
       };
 
       //Set date for the modal
       $scope.setIonicDatePickerDate = function () {
-        $scope.mainObj.callback($scope.selctedDateEpoch);
+        $scope.mainObj.callbackSet($scope.selctedDateEpoch);
         closeModal();
       };
 
@@ -240,7 +240,7 @@ angular.module('ionic-datepicker.provider', [])
             text: $scope.mainObj.setLabel,
             type: 'button_set',
             onTap: function (e) {
-              $scope.mainObj.callback($scope.selctedDateEpoch);
+              $scope.mainObj.callbackSet($scope.selctedDateEpoch);
             }
           }];
         }
@@ -253,6 +253,7 @@ angular.module('ionic-datepicker.provider', [])
               var today = new Date();
               refreshDateList(new Date());
               $scope.selctedDateEpoch = resetHMSM(today).getTime();
+              $scope.mainObj.callbackToday($scope.selctedDateEpoch);
               if (!$scope.mainObj.closeOnSelect) {
                 e.preventDefault();
               }
@@ -264,6 +265,7 @@ angular.module('ionic-datepicker.provider', [])
           text: $scope.mainObj.closeLabel,
           type: 'button_close',
           onTap: function (e) {
+            $scope.mainObj.callbackClose($scope.selctedDateEpoch);
             console.log('ionic-datepicker popup closed.');
           }
         });
