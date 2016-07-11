@@ -209,6 +209,7 @@ angular.module('ionic-datepicker.provider', [])
       }
 
       function closeModal() {
+        $scope.mainObj.callbackClose($scope.selctedDateEpoch);
         $scope.modal.hide();
       }
 
