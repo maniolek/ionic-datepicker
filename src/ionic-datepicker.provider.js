@@ -31,33 +31,33 @@ angular.module('ionic-datepicker.provider', [])
 
       //Reset the hours, minutes, seconds and milli seconds
       function resetHMSM(currentDate) {
-        currentDate.setHours(0);
-        currentDate.setMinutes(0);
-        currentDate.setSeconds(0);
-        currentDate.setMilliseconds(0);
+        currentDate.setUTCHours(0);
+        currentDate.setUTCMinutes(0);
+        currentDate.setUTCSeconds(0);
+        currentDate.setUTCMilliseconds(0);
         return currentDate;
       }
 
       //Previous month
       $scope.prevMonth = function () {
         if ($scope.currentDate.getMonth() === 1) {
-          $scope.currentDate.setFullYear($scope.currentDate.getFullYear());
+          $scope.currentDate.setUTCFullYear($scope.currentDate.getFullYear());
         }
-        $scope.currentDate.setMonth($scope.currentDate.getMonth() - 1);
-        $scope.data.currentMonth = $scope.mainObj.monthsList[$scope.currentDate.getMonth()];
-        $scope.data.currentYear = $scope.currentDate.getFullYear();
+        $scope.currentDate.setUTCMonth($scope.currentDate.getUTCMonth() - 1);
+        $scope.data.currentMonth = $scope.mainObj.monthsList[$scope.currentDate.getUTCMonth()];
+        $scope.data.currentYear = $scope.currentDate.getUTCFullYear();
         refreshDateList($scope.currentDate);
       };
 
       //Next month
       $scope.nextMonth = function () {
-        if ($scope.currentDate.getMonth() === 11) {
-          $scope.currentDate.setFullYear($scope.currentDate.getFullYear());
+        if ($scope.currentDate.getUTCMonth() === 11) {
+          $scope.currentDate.setUTCFullYear($scope.currentDate.getUTCFullYear());
         }
-        $scope.currentDate.setDate(1);
-        $scope.currentDate.setMonth($scope.currentDate.getMonth() + 1);
-        $scope.data.currentMonth = $scope.mainObj.monthsList[$scope.currentDate.getMonth()];
-        $scope.data.currentYear = $scope.currentDate.getFullYear();
+        $scope.currentDate.setUTCDate(1);
+        $scope.currentDate.setUTCMonth($scope.currentDate.getUTCMonth() + 1);
+        $scope.data.currentMonth = $scope.mainObj.monthsList[$scope.currentDate.getUTCMonth()];
+        $scope.data.currentYear = $scope.currentDate.getUTCFullYear();
         refreshDateList($scope.currentDate);
       };
 
@@ -76,11 +76,16 @@ angular.module('ionic-datepicker.provider', [])
         }
       };
 
+      $scope.getUtcTime = function (now) {
+        return Date.UTC(now.getFullYear(),now.getMonth(), now.getDate() ,
+          now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+      };
+
       //Set today as date for the modal
       $scope.setIonicDatePickerTodayDate = function () {
         var today = new Date();
         refreshDateList(new Date());
-        $scope.selctedDateEpoch = resetHMSM(today).getTime();
+        $scope.selctedDateEpoch = $scope.getUtcTime(resetHMSM(today));
         if ($scope.mainObj.closeOnSelect) {
           $scope.mainObj.callbackSet($scope.selctedDateEpoch);
           closeModal();
@@ -101,7 +106,7 @@ angular.module('ionic-datepicker.provider', [])
           $scope.disabledDates = [];
           angular.forEach(mainObj.disabledDates, function (val, key) {
             val = resetHMSM(new Date(val));
-            $scope.disabledDates.push(val.getTime());
+            $scope.disabledDates.push($scope.getUtcTime(val));
           });
         }
       }
@@ -111,8 +116,8 @@ angular.module('ionic-datepicker.provider', [])
         currentDate = resetHMSM(currentDate);
         $scope.currentDate = angular.copy(currentDate);
 
-        var firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDate();
-        var lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+        var firstDay = new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), 1).getUTCDate();
+        var lastDay = new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + 1, 0).getUTCDate();
 
         $scope.monthsList = [];
         if ($scope.mainObj.monthsList && $scope.mainObj.monthsList.length === 12) {
@@ -126,19 +131,20 @@ angular.module('ionic-datepicker.provider', [])
         $scope.dayList = [];
 
         var tempDate, disabled;
-        $scope.firstDayEpoch = resetHMSM(new Date(currentDate.getFullYear(), currentDate.getMonth(), firstDay)).getTime();
-        $scope.lastDayEpoch = resetHMSM(new Date(currentDate.getFullYear(), currentDate.getMonth(), lastDay)).getTime();
+        $scope.firstDayEpoch = $scope.getUtcTime(resetHMSM(new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), firstDay)));
+
+        $scope.lastDayEpoch = $scope.getUtcTime(resetHMSM(new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), lastDay)));
 
         for (var i = firstDay; i <= lastDay; i++) {
-          tempDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
-          disabled = (tempDate.getTime() < $scope.fromDate) || (tempDate.getTime() > $scope.toDate) || $scope.mainObj.disableWeekdays.indexOf(tempDate.getDay()) >= 0;
+          tempDate = new Date(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), i);
+          disabled = ($scope.getUtcTime(tempDate) < $scope.fromDate) || ($scope.getUtcTime(tempDate) > $scope.toDate) || $scope.mainObj.disableWeekdays.indexOf(tempDate.getUTCDay()) >= 0;
 
           $scope.dayList.push({
-            date: tempDate.getDate(),
-            month: tempDate.getMonth(),
-            year: tempDate.getFullYear(),
-            day: tempDate.getDay(),
-            epoch: tempDate.getTime(),
+            date: tempDate.getUTCDate(),
+            month: tempDate.getUTCMonth(),
+            year: tempDate.getUTCFullYear(),
+            day: tempDate.getUTCDay(),
+            epoch: $scope.getUtcTime(tempDate),
             disabled: disabled
           });
         }
@@ -154,8 +160,8 @@ angular.module('ionic-datepicker.provider', [])
         $scope.rows = [0, 7, 14, 21, 28, 35];
         $scope.cols = [0, 1, 2, 3, 4, 5, 6];
 
-        $scope.data.currentMonth = $scope.mainObj.monthsList[currentDate.getMonth()];
-        $scope.data.currentYear = currentDate.getFullYear();
+        $scope.data.currentMonth = $scope.mainObj.monthsList[currentDate.getUTCMonth()];
+        $scope.data.currentYear = currentDate.getUTCFullYear();
         $scope.data.currentMonthSelected = angular.copy($scope.data.currentMonth);
         $scope.currentYearSelected = angular.copy($scope.data.currentYear);
         $scope.numColumns = 7;
@@ -164,20 +170,20 @@ angular.module('ionic-datepicker.provider', [])
       //Month changed
       $scope.monthChanged = function (month) {
         var monthNumber = $scope.monthsList.indexOf(month);
-        $scope.currentDate.setMonth(monthNumber);
+        $scope.currentDate.setUTCMonth(monthNumber);
         refreshDateList($scope.currentDate);
       };
 
       //Year changed
       $scope.yearChanged = function (year) {
-        $scope.currentDate.setFullYear(year);
+        $scope.currentDate.setUTCFullYear(year);
         refreshDateList($scope.currentDate);
       };
 
       //Setting up the initial object
       function setInitialObj(ipObj) {
         $scope.mainObj = angular.copy(ipObj);
-        $scope.selctedDateEpoch = resetHMSM($scope.mainObj.inputDate).getTime();
+        $scope.selctedDateEpoch = $scope.getUtcTime(resetHMSM($scope.mainObj.inputDate));
 
         if ($scope.mainObj.weeksList && $scope.mainObj.weeksList.length === 7) {
           $scope.weeksList = $scope.mainObj.weeksList;
@@ -225,10 +231,10 @@ angular.module('ionic-datepicker.provider', [])
 
         $scope.mainObj = angular.extend({}, config, ipObj);
         if ($scope.mainObj.from) {
-          $scope.fromDate = resetHMSM(new Date($scope.mainObj.from)).getTime();
+          $scope.fromDate = $scope.getUtcTime(resetHMSM(new Date($scope.mainObj.from)));
         }
         if ($scope.mainObj.to) {
-          $scope.toDate = resetHMSM(new Date($scope.mainObj.to)).getTime();
+          $scope.toDate = $scope.getUtcTime(resetHMSM(new Date($scope.mainObj.to)));
         }
 
         if (ipObj.disableWeekdays && config.disableWeekdays) {
@@ -253,7 +259,7 @@ angular.module('ionic-datepicker.provider', [])
             onTap: function (e) {
               var today = new Date();
               refreshDateList(new Date());
-              $scope.selctedDateEpoch = resetHMSM(today).getTime();
+              $scope.selctedDateEpoch = $scope.getUtcTime(resetHMSM(today));
               $scope.mainObj.callbackToday($scope.selctedDateEpoch);
               if (!$scope.mainObj.closeOnSelect) {
                 e.preventDefault();
